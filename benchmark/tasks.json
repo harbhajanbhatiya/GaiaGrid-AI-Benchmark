@@ -1,0 +1,170 @@
+[
+  {
+    "task_id": "GG-001",
+    "category": "Dataset interpretation",
+    "difficulty": "medium",
+    "source_type": "provided_dataset",
+    "prompt": "Using the supplied statewise NGO dataset, identify the state with the highest Active NGOs count. Return JSON with keys state and active_ngos. Do not infer NGO effectiveness from the count.",
+    "input_data": {
+      "dataset_file": "data/statewise_ngo.csv"
+    },
+    "expected_answer": {
+      "state": "Maharashtra",
+      "active_ngos": 66913
+    },
+    "scoring": {
+      "state": "exact_case_insensitive",
+      "active_ngos": "exact_numeric"
+    }
+  },
+  {
+    "task_id": "GG-002",
+    "category": "Statistical reasoning",
+    "difficulty": "medium",
+    "source_type": "provided_dataset",
+    "prompt": "Using all rows in the supplied dataset, report the median Active NGOs count and the number of records. Return JSON with keys median_active_ngos and record_count. Do not report the mean as the median.",
+    "input_data": {
+      "dataset_file": "data/statewise_ngo.csv"
+    },
+    "expected_answer": {
+      "median_active_ngos": 6132.0,
+      "record_count": 35
+    },
+    "scoring": {
+      "median_active_ngos": "exact_numeric",
+      "record_count": "exact_numeric"
+    }
+  },
+  {
+    "task_id": "GG-003",
+    "category": "AQI interpretation",
+    "difficulty": "hard",
+    "source_type": "synthetic_test_case",
+    "prompt": "Interpret this OpenWeather-style air pollution index. In this test, the scale is explicitly defined as 1=Good, 2=Fair, 3=Moderate, 4=Poor, 5=Very Poor. Return JSON with keys category and limitation. The limitation must state that this index is not a direct concentration measurement and must not be relabelled as the US EPA AQI.",
+    "input_data": {
+      "ow_aqi_index": 5,
+      "scale_definition": {
+        "1": "Good",
+        "2": "Fair",
+        "3": "Moderate",
+        "4": "Poor",
+        "5": "Very Poor"
+      }
+    },
+    "expected_answer": {
+      "category": "Very Poor",
+      "limitation": "This index is a categorical scale, not a direct pollutant concentration measurement, and it is not the US EPA AQI."
+    },
+    "scoring": {
+      "category": "exact_case_insensitive",
+      "limitation": "required_concepts"
+    }
+  },
+  {
+    "task_id": "GG-004",
+    "category": "Mathematical verification",
+    "difficulty": "hard",
+    "source_type": "synthetic_test_case",
+    "prompt": "Calculate the custom GaiaGrid score using S=(0.40*N + 0.35*A + 0.25*T)*100. N, A and T are already normalized to the range 0 to 1. Return JSON with key score, rounded to 2 decimal places. Treat this as a custom heuristic, not a scientifically validated sustainability index.",
+    "input_data": {
+      "N": 0.6,
+      "A": 0.8,
+      "T": 0.4
+    },
+    "expected_answer": {
+      "score": 62.0
+    },
+    "scoring": {
+      "score": "numeric_tolerance_0_01"
+    }
+  },
+  {
+    "task_id": "GG-005",
+    "category": "Correlation versus causation",
+    "difficulty": "hard",
+    "source_type": "synthetic_test_case",
+    "prompt": "A cross-sectional table shows that regions with more registered NGOs also have lower pollution readings. Return JSON with keys causal_claim_supported, conclusion, and two_alternative_explanations. Do not claim that NGO count caused lower pollution from this evidence alone.",
+    "input_data": {
+      "design": "cross-sectional observational comparison",
+      "observed_pattern": "higher NGO counts co-occur with lower pollution readings",
+      "randomized_intervention": false
+    },
+    "expected_answer": {
+      "causal_claim_supported": false,
+      "conclusion": "The observed association does not establish that higher NGO counts caused lower pollution.",
+      "two_alternative_explanations": [
+        "wealth or urbanization differences",
+        "government regulation or industrial mix differences"
+      ]
+    },
+    "scoring": {
+      "causal_claim_supported": "exact_boolean",
+      "conclusion": "required_concepts",
+      "two_alternative_explanations": "at_least_two_relevant"
+    }
+  },
+  {
+    "task_id": "GG-006",
+    "category": "Missing-data reasoning",
+    "difficulty": "hard",
+    "source_type": "synthetic_test_case",
+    "prompt": "A state's NGO count is available but its current AQI and temperature readings are missing. Return JSON with keys environmental_score_calculable, action, and prohibited_assumption. Do not invent missing readings or silently treat missing values as good conditions.",
+    "input_data": {
+      "state": "Example State",
+      "ngo_count": 1200,
+      "aqi": null,
+      "temperature_c": null
+    },
+    "expected_answer": {
+      "environmental_score_calculable": false,
+      "action": "Request valid measurements or report the environmental score as unavailable until required inputs are present.",
+      "prohibited_assumption": "Do not impute missing AQI or temperature as healthy, zero, or a neutral value without an explicit documented policy."
+    },
+    "scoring": {
+      "environmental_score_calculable": "exact_boolean",
+      "action": "required_concepts",
+      "prohibited_assumption": "required_concepts"
+    }
+  },
+  {
+    "task_id": "GG-007",
+    "category": "Simulation reasoning",
+    "difficulty": "expert",
+    "source_type": "synthetic_test_case",
+    "prompt": "A min-max normalized NGO feature is recalculated after every scenario. All states' raw NGO counts are multiplied by the same positive factor 1.20, with no clipping or row changes. Return JSON with keys normalized_values_change and explanation. Determine whether this uniform scaling changes min-max normalized values.",
+    "input_data": {
+      "transformation": "x_new = 1.20*x for every state",
+      "normalization": "(x-min(x))/(max(x)-min(x))"
+    },
+    "expected_answer": {
+      "normalized_values_change": false,
+      "explanation": "A uniform positive scaling multiplies the minimum, maximum and each observation by the same factor, so the factor cancels in min-max normalization."
+    },
+    "scoring": {
+      "normalized_values_change": "exact_boolean",
+      "explanation": "required_concepts"
+    }
+  },
+  {
+    "task_id": "GG-008",
+    "category": "Evidence-based decision making",
+    "difficulty": "expert",
+    "source_type": "provided_dataset_plus_limitations",
+    "prompt": "Using only the supplied NGO-count dataset, identify the state with the lowest count and give one cautious planning implication. Return JSON with keys state, active_ngos, planning_implication, and evidence_limit. Do not claim this state has the worst environment or that it has the least effective NGOs.",
+    "input_data": {
+      "dataset_file": "data/statewise_ngo.csv"
+    },
+    "expected_answer": {
+      "state": "Lakshadweep",
+      "active_ngos": 12,
+      "planning_implication": "The low recorded count may justify checking local civil-society coverage and data completeness before deciding whether outreach or capacity-building is needed.",
+      "evidence_limit": "NGO counts alone do not measure NGO effectiveness, population-adjusted coverage, environmental quality, or actual need."
+    },
+    "scoring": {
+      "state": "exact_case_insensitive",
+      "active_ngos": "exact_numeric",
+      "planning_implication": "required_concepts",
+      "evidence_limit": "required_concepts"
+    }
+  }
+]

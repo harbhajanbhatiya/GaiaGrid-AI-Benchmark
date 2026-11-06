@@ -1,0 +1,13 @@
+@"
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
+*.py[cod]
+venv/
+.venv/
+results/raw_outputs/
+results/raw_outputs_backup/
+results/raw_outputs_run1/
+"@ | Set-Content .gitignore
